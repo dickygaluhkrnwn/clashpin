@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       };
     });
 
-    // Urutkan berdasarkan waktu terbaru di memori (mengurangi beban pembuatan indeks manual di Firebase)
+    // Urutkan berdasarkan waktu terbaru di memori
     const sortedHistory = historyData.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
@@ -55,5 +55,22 @@ export async function GET(request: Request) {
   } catch (error: any) {
     console.error("Gagal mengambil riwayat undian:", error);
     return NextResponse.json({ error: 'Gagal memuat data dari server: ' + error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+
+  if (!id) {
+    return NextResponse.json({ error: 'ID Riwayat wajib disertakan.' }, { status: 400 });
+  }
+
+  try {
+    await db.collection('clashpin_history').doc(id).delete();
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: any) {
+    console.error("Gagal menghapus riwayat:", error);
+    return NextResponse.json({ error: 'Gagal menghapus data: ' + error.message }, { status: 500 });
   }
 }

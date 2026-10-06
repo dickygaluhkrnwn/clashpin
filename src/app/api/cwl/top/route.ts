@@ -113,13 +113,46 @@ export async function GET(request: Request) {
     const membersArray = Object.values(memberStats);
     if (membersArray.length === 0) return NextResponse.json({ error: 'Data member tidak ditemukan.' }, { status: 404 });
 
+    // ----------------------------------------------------------------------
+    // LOGIKA PINTAR: BLACKLIST PEMENANG TAHUN INI (1 Kemenangan per Tahun)
+    // ----------------------------------------------------------------------
+    const currentYear = new Date().getFullYear();
+    const historySnap = await db.collection('clashpin_history')
+      .where('clanTag', '==', rawClanTag)
+      .get();
+      
+    const winnersThisYear = new Set<string>();
+    
+    historySnap.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.createdAt && data.winner) {
+        // createdAt adalah Timestamp Firestore
+        const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+        if (date.getFullYear() === currentYear) {
+          winnersThisYear.add(data.winner);
+        }
+      }
+    });
+
+    // Urutkan berdasarkan performa
     const sortedMembers = membersArray.sort((a, b) => {
       if (b.stars !== a.stars) return b.stars - a.stars;
       return b.destruction - a.destruction;
     });
 
-    const topNames = sortedMembers.slice(0, limit).map(m => m.name);
-    return NextResponse.json({ top: topNames, source: dataSource }, { status: 200 });
+    // Filter member yang BELUM pernah menang tahun ini
+    const eligibleMembers = sortedMembers.filter(m => !winnersThisYear.has(m.name));
+
+    // Ambil top N dari yang eligible. Jika yang eligible kurang dari limit,
+    // (misalnya limit 5 tapi eligible cuma 3), ya kita kembalikan 3 saja.
+    // Jika semua sudah menang, kembalikan array kosong (nanti bisa di-handle di frontend).
+    const topNames = eligibleMembers.slice(0, limit).map(m => m.name);
+    
+    return NextResponse.json({ 
+      top: topNames, 
+      source: dataSource,
+      blacklistedCount: winnersThisYear.size 
+    }, { status: 200 });
 
   } catch (error: any) {
     return NextResponse.json({ error: 'Terjadi kesalahan sistem: ' + error.message }, { status: 500 });

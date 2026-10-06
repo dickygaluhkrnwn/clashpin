@@ -24,7 +24,8 @@ export async function GET(request: Request) {
   try {
     // Koreksi: Gunakan managedClans dan cwlArchives
     const archiveRef = db.collection('managedClans').doc(clanId).collection('cwlArchives');
-    const snap = await archiveRef.orderBy('season', 'desc').get();
+    // FIX: Gunakan .select('season') agar tidak menarik semua data histori perang yang sangat besar ke memori!
+    const snap = await archiveRef.select('season').orderBy('season', 'desc').get();
 
     if (snap.empty) {
       return NextResponse.json({ seasons: [] }, { status: 200 });
