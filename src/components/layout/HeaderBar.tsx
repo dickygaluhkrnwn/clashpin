@@ -85,7 +85,7 @@ export function HeaderBar() {
   if (!user) return null;
 
   return (
-    <header className="fixed top-0 left-0 w-full h-16 bg-[#0f0f13]/80 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/50 z-[100] px-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 w-full h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-[#0f0f13]/80 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/50 z-[100] px-4 flex items-center justify-between">
       <div className="flex flex-col">
         <h1 className="text-lg font-black tracking-wide text-white">{getPageTitle()}</h1>
         {clanTag && <span className="text-[10px] text-gold font-mono uppercase tracking-widest">{clanTag}</span>}

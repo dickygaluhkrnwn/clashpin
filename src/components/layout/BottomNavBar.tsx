@@ -21,7 +21,10 @@ export function BottomNavBar() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-50 px-4 pb-safe-4 pt-2 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent border-t border-white/5 backdrop-blur-md">
+    <div 
+      className="fixed bottom-0 left-0 w-full z-50 px-4 pt-2 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent border-t border-white/5 backdrop-blur-md"
+      style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+    >
       <nav className="flex items-center justify-between max-w-md mx-auto">
         {MENUS.map((menu) => {
           const isActive = pathname === menu.path;

@@ -21,7 +21,13 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
       <HeaderBar />
 
       {/* KONTEN UTAMA - Dengan padding top (header) dan bottom (nav) agar tidak tertutup */}
-      <main className="flex-1 w-full overflow-y-auto pt-[64px] pb-[80px] flex flex-col relative">
+      <main 
+        className="flex-1 w-full overflow-y-auto flex flex-col relative"
+        style={{
+          paddingTop: 'calc(64px + env(safe-area-inset-top))',
+          paddingBottom: 'calc(80px + env(safe-area-inset-bottom))'
+        }}
+      >
         {children}
       </main>
 
