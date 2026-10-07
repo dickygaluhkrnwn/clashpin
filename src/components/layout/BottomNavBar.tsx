@@ -22,7 +22,7 @@ export function BottomNavBar() {
 
   return (
     <div 
-      className="fixed bottom-0 left-0 w-full z-50 px-4 pt-2 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent border-t border-white/5 backdrop-blur-md"
+      className="fixed bottom-0 left-0 w-full z-50 px-4 pt-2 bg-[#050505]/95 border-t border-white/5 backdrop-blur-md"
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
       <nav className="flex items-center justify-between max-w-md mx-auto">
