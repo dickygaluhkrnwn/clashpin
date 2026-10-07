@@ -20,14 +20,14 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#050505] font-sans">
+    <div className="relative min-h-screen w-full bg-[#050505] font-sans flex flex-col">
       
       {/* TOP HEADER BAR (GLOBAL) */}
       <HeaderBar />
 
       {/* KONTEN UTAMA - Dengan padding top (header) dan bottom (nav) agar tidak tertutup */}
       <main 
-        className="w-full relative"
+        className="flex-1 w-full relative flex flex-col"
         style={{
           paddingTop: 'calc(4rem + env(safe-area-inset-top))',
           paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))'
