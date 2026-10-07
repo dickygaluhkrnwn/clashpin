@@ -203,7 +203,8 @@ export function SpinnerWorkspace() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsDrawerOpen(true)}
-        className="fixed bottom-24 right-4 z-40 w-14 h-14 bg-gradient-to-br from-gold to-yellow-600 rounded-full shadow-[0_5px_20px_rgba(250,204,21,0.4)] flex items-center justify-center text-black border-2 border-[#121318]"
+        className="fixed right-4 z-40 w-14 h-14 bg-gradient-to-br from-gold to-yellow-600 rounded-full shadow-[0_5px_20px_rgba(250,204,21,0.4)] flex items-center justify-center text-black border-2 border-[#121318]"
+        style={{ bottom: 'calc(5.5rem + env(safe-area-inset-bottom))' }}
       >
         <Users className="w-6 h-6" />
         <span className="absolute -top-1 -right-1 w-5 h-5 bg-elixir rounded-full text-[10px] text-white font-bold flex items-center justify-center border-2 border-[#121318]">

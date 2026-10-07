@@ -13,7 +13,7 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   if (!isInitialized || !user) {
     return (
       <main 
-        className="min-h-[100dvh] w-full bg-[#050505] flex flex-col relative"
+        className="fixed inset-0 w-full h-full bg-[#050505] flex flex-col relative overflow-y-auto"
         style={{
           paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: 'env(safe-area-inset-bottom)'
@@ -26,7 +26,7 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-[#050505] overflow-hidden flex flex-col font-sans">
+    <div className="fixed inset-0 w-full h-full bg-[#050505] overflow-hidden flex flex-col font-sans">
       
       {/* TOP HEADER BAR (GLOBAL) */}
       <HeaderBar />
