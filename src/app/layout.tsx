@@ -1,11 +1,25 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#020617", // slate-950 yang biasa dipakai di dark mode
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "Clashpin - Premium CoC Giveaway",
   description: "Platform undian profesional untuk klan Clash of Clans.",
   icons: {
-    icon: '/icon.png', // Mengarah otomatis ke file src/app/icon.png
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Clashpin",
   },
 };
 

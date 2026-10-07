@@ -2,17 +2,44 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Settings, ChevronDown } from "lucide-react";
+import { LogOut, Settings, ChevronDown, Download } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useToastStore } from "@/components/ui/Toast";
+
+// Interface untuk event beforeinstallprompt
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 export function HeaderBar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logoutUser, clanTag } = useAuthStore();
+  const { showToast } = useToastStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,6 +55,20 @@ export function HeaderBar() {
     await logoutUser();
     setIsDropdownOpen(false);
     router.push("/login");
+  };
+
+  const handleInstallApp = async () => {
+    setIsDropdownOpen(false);
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      // Fallback untuk iOS/Safari atau jika aplikasi sudah terinstall
+      showToast("Gunakan fitur 'Add to Home Screen' (Bagikan -> Tambahkan ke Layar Utama) di menu browser Anda.", "info");
+    }
   };
 
   const getPageTitle = () => {
@@ -85,6 +126,11 @@ export function HeaderBar() {
                 <Settings className="w-4 h-4" />
                 Pengaturan Klan
               </Link>
+              
+              <button onClick={handleInstallApp} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-left">
+                <Download className="w-4 h-4" />
+                Install Aplikasi
+              </button>
               
               <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors text-left">
                 <LogOut className="w-4 h-4" />
