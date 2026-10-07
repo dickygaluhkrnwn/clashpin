@@ -31,19 +31,24 @@ export async function GET(request: Request) {
     const roundsHistory: any[] = [];
     
     const archiveRef = db.collection('managedClans').doc(clanId).collection('cwlArchives');
-    let archiveSnap;
-
+    let archiveData: any;
+    
     if (seasonParam === 'current') {
-      archiveSnap = await archiveRef.orderBy('season', 'desc').limit(1).get();
+      const allDocsSnap = await archiveRef.orderBy('season', 'desc').get();
+      // FIX: Cari dokumen pertama yang ID-nya mengandung '_' (yaitu dokumen buatan clashub-nextjs / clashpin baru)
+      const validDoc = allDocsSnap.docs.find(d => d.id.includes('_'));
+      if (!validDoc) {
+        return NextResponse.json({ error: `Tidak ada data arsip valid.` }, { status: 404 });
+      }
+      archiveData = validDoc.data();
     } else {
-      archiveSnap = await archiveRef.where('season', '==', seasonParam).limit(1).get();
+      const docId = `${seasonParam}_${clanId}`;
+      const docSnap = await archiveRef.doc(docId).get();
+      if (!docSnap.exists) {
+        return NextResponse.json({ error: `Tidak ada data arsip untuk season ${seasonParam}.` }, { status: 404 });
+      }
+      archiveData = docSnap.data();
     }
-
-    if (archiveSnap.empty) {
-      return NextResponse.json({ error: `Tidak ada data arsip untuk season ${seasonParam}.` }, { status: 404 });
-    }
-
-    const archiveData = archiveSnap.docs[0].data();
     const actualSeason = archiveData.season;
 
     if (archiveData.rounds) {

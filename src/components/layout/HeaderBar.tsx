@@ -55,11 +55,15 @@ export function HeaderBar() {
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="flex items-center gap-2 p-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-yellow-600 flex items-center justify-center shadow-inner">
-            <span className="text-black font-bold text-xs uppercase">
-              {user.displayName?.charAt(0) || "U"}
-            </span>
-          </div>
+          {user.photoURL ? (
+            <img src={user.photoURL} alt="Avatar" className="w-8 h-8 rounded-full object-cover shadow-inner" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-yellow-600 flex items-center justify-center shadow-inner">
+              <span className="text-black font-bold text-xs uppercase">
+                {user.displayName?.charAt(0) || "U"}
+              </span>
+            </div>
+          )}
           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
         </button>
 

@@ -14,7 +14,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { useToastStore } from "@/components/ui/Toast";
 
 export default function ProfilePage() {
-  const { user, role, clanTag, playerTag, isInitialized, logoutUser, initAuth } = useAuthStore();
+  const { user, role, clanTag, clanId, playerTag, isInitialized, logoutUser, initAuth } = useAuthStore();
   const router = useRouter();
   
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
@@ -151,7 +151,7 @@ export default function ProfilePage() {
       const res = await fetch("/api/cwl/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clanTag })
+        body: JSON.stringify({ clanTag, clanId })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal sinkronisasi");

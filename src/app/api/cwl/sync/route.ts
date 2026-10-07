@@ -15,8 +15,8 @@ const db = getFirestore();
 
 export async function POST(req: Request) {
   try {
-    const { clanTag } = await req.json();
-    if (!clanTag) return NextResponse.json({ error: "clanTag required" }, { status: 400 });
+    const { clanTag, clanId } = await req.json();
+    if (!clanTag || !clanId) return NextResponse.json({ error: "clanTag and clanId required" }, { status: 400 });
 
     // FIX: Normalisasi clanTag agar selalu memiliki '#'
     const normalizedClanTag = clanTag.startsWith("#") ? clanTag : `#${clanTag}`;
@@ -45,69 +45,40 @@ export async function POST(req: Request) {
 
     // 2. Fetch all war details (Gunakan Proxy RoyaleAPI)
     const season = groupData.season;
-    const rounds = [];
     
+    // Kumpulkan semua promise fetch
+    const fetchPromises = [];
     for (const round of groupData.rounds || []) {
       for (const warTag of round.warTags || []) {
         if (warTag === "#0") continue;
-        const warRes = await fetch(`https://cocproxy.royaleapi.dev/v1/clanwarleagues/wars/${encodeURIComponent(warTag)}`, {
-           headers: { 
-             Authorization: `Bearer ${cocToken}`,
-             Accept: 'application/json'
-           },
-           cache: "no-store"
-        });
-        if (warRes.ok) {
-           const warData = await warRes.json();
-           if (warData.clan.tag === normalizedClanTag || warData.opponent.tag === normalizedClanTag) {
-              rounds.push(warData);
-           }
-        }
+        fetchPromises.push(
+          fetch(`https://cocproxy.royaleapi.dev/v1/clanwarleagues/wars/${encodeURIComponent(warTag)}`, {
+            headers: { 
+              Authorization: `Bearer ${cocToken}`,
+              Accept: 'application/json'
+            },
+            cache: "no-store"
+          }).then(async (res) => {
+             if (!res.ok) return null;
+             const data = await res.json();
+             if (data.clan?.tag === normalizedClanTag || data.opponent?.tag === normalizedClanTag) {
+                return data;
+             }
+             return null;
+          }).catch(() => null)
+        );
       }
     }
 
-    // 3. FIX: Fetch Live Current War (Bypass cache lambat dari endpoint leaguegroup wars)
-    // clashofclans.js dan RoyaleAPI merekomendasikan fetch /currentwar untuk data real-time CWL hari ini.
-    try {
-       const liveWarRes = await fetch(`https://cocproxy.royaleapi.dev/v1/clans/${tagForUrl}/currentwar`, {
-          headers: { 
-            Authorization: `Bearer ${cocToken}`,
-            Accept: 'application/json'
-          },
-          cache: "no-store"
-       });
-       
-       if (liveWarRes.ok) {
-          const liveWarData = await liveWarRes.json();
-          // Pastikan ini adalah war yang sah dan bukan notInWar
-          if (liveWarData.state !== "notInWar" && (liveWarData.clan?.tag === normalizedClanTag || liveWarData.opponent?.tag === normalizedClanTag)) {
-             // Cari round di array 'rounds' yang lawannya sama dengan liveWarData
-             // Tujuannya menimpa data round lama dengan data real-time ini
-             const opponentTag = liveWarData.clan.tag === normalizedClanTag ? liveWarData.opponent.tag : liveWarData.clan.tag;
-             
-             const staleRoundIndex = rounds.findIndex(r => 
-                (r.clan.tag === normalizedClanTag && r.opponent.tag === opponentTag) || 
-                (r.opponent.tag === normalizedClanTag && r.clan.tag === opponentTag)
-             );
+    // Tunggu semua request paralel selesai
+    const results = await Promise.all(fetchPromises);
+    const rounds = results.filter((data) => data !== null);
 
-             if (staleRoundIndex !== -1) {
-                // Timpa data basi dengan data live
-                rounds[staleRoundIndex] = liveWarData;
-                console.log(`[CWL Sync] Overwritten stale round data with real-time /currentwar data for opponent ${opponentTag}`);
-             } else {
-                // Jika entah kenapa belum ada (misal warTag masih #0 di leaguegroup), push saja!
-                rounds.push(liveWarData);
-                console.log(`[CWL Sync] Inserted new live war data from /currentwar for opponent ${opponentTag}`);
-             }
-          }
-       }
-    } catch (e) {
-       console.error("Gagal melakukan fetch /currentwar real-time fallback", e);
-    }
 
     // 4. Save to Firestore
-    const clanId = clanTag.replace("#", "");
-    const archiveRef = db.collection("managedClans").doc(clanId).collection("cwlArchives").doc(season);
+    const cleanTag = clanTag.replace("#", "");
+    const docId = `${season}_${cleanTag}`; // FIX: Sesuaikan format ID dengan clashub-nextjs
+    const archiveRef = db.collection("managedClans").doc(clanId).collection("cwlArchives").doc(docId);
     
     await archiveRef.set({
        season,
