@@ -11,7 +11,18 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   // Selama auth belum selesai inisialisasi atau user belum login (sedang di Onboarding)
   // jangan tampilkan Bottom Navigation Bar dan Header.
   if (!isInitialized || !user) {
-    return <main className="min-h-[100dvh] w-full bg-[#050505]">{children}</main>;
+    return (
+      <main 
+        className="min-h-[100dvh] w-full bg-[#050505] flex flex-col relative"
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        }}
+      >
+        {children}
+        <ToastProvider />
+      </main>
+    );
   }
 
   return (
