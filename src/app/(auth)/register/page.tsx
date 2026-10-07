@@ -58,12 +58,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="h-full bg-background flex flex-col p-6 relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-background flex flex-col p-6 relative overflow-hidden">
       {/* Background Glows */}
       <div className="absolute top-[-100px] left-[-100px] w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-elixir/10 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-100px] right-[-100px] w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
 
-      <header className="relative z-10 flex items-center mb-10">
+      <header className="relative z-10 flex items-center mb-10 mt-2" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <Link href="/" className="p-2 -ml-2 text-gray-400 hover:text-white rounded-xl transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </Link>

@@ -12,13 +12,7 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   // jangan tampilkan Bottom Navigation Bar dan Header.
   if (!isInitialized || !user) {
     return (
-      <main 
-        className="fixed inset-0 w-full h-full bg-[#050505] flex flex-col relative overflow-y-auto"
-        style={{
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)'
-        }}
-      >
+      <main className="bg-[#050505]">
         {children}
         <ToastProvider />
       </main>
