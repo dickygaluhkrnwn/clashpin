@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { useToastStore } from "@/components/ui/Toast";
 
 const COC_COLORS = ["#facc15", "#d946ef", "#3b82f6", "#10b981", "#f43f5e", "#8b5cf6", "#f97316"];
 
@@ -25,6 +26,7 @@ const formatSeason = (season: string) => {
 
 export function SpinnerWorkspace() {
   const { role, clanTag, clanId, user, isInitialized, initAuth } = useAuthStore();
+  const { showToast } = useToastStore();
   
   const [participants, setParticipants] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -100,8 +102,21 @@ export function SpinnerWorkspace() {
       setParticipants(data.top);
       setWinner(null);
       setIsDrawerOpen(false);
+
+      if (data.top.length === 0) {
+        if (data.blacklistedCount > 0) {
+          showToast(`Semua clasher top sudah pernah menang tahun ini.`, "error");
+        } else {
+          showToast(`Tidak ada data clasher yang memenuhi kriteria.`, "error");
+        }
+      } else if (data.blacklistedCount > 0) {
+        showToast(`Ditarik ${data.top.length} peserta. (${data.blacklistedCount} orang dilewati karena sudah menang tahun ini)`, "success");
+      } else {
+        showToast(`Berhasil ditarik ${data.top.length} peserta!`, "success");
+      }
+      
     } catch (error: any) {
-      alert(`Gagal menarik data CWL: ${error.message}`);
+      showToast(`Gagal menarik data CWL: ${error.message}`, "error");
     } finally {
       setIsLoadingApi(false);
     }

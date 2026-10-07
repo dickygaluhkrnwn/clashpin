@@ -80,18 +80,28 @@ export async function GET(request: Request) {
       // Koreksi: Menggunakan managedClans dan cwlArchives
       const archiveRef = db.collection('managedClans').doc(clanId).collection('cwlArchives');
       let archiveSnap;
+      let archiveData: any;
 
       if (seasonParam === 'current') {
-        archiveSnap = await archiveRef.orderBy('season', 'desc').limit(1).get();
+        archiveSnap = await archiveRef.orderBy('season', 'desc').get();
+        if (!archiveSnap.empty) {
+          const latestSeason = archiveSnap.docs[0].data().season;
+          const docsForLatest = archiveSnap.docs.filter(d => d.data().season === latestSeason);
+          const bestDoc = docsForLatest.find(d => d.id.includes('_')) || docsForLatest[0];
+          archiveData = bestDoc.data();
+        }
       } else {
-        archiveSnap = await archiveRef.where('season', '==', seasonParam).limit(1).get();
+        archiveSnap = await archiveRef.where('season', '==', seasonParam).get();
+        if (!archiveSnap.empty) {
+          const bestDoc = archiveSnap.docs.find(d => d.id.includes('_')) || archiveSnap.docs[0];
+          archiveData = bestDoc.data();
+        }
       }
 
-      if (archiveSnap.empty) {
+      if (!archiveData) {
         return NextResponse.json({ error: `Tidak ada data arsip untuk season ${seasonParam === 'current' ? 'terbaru' : seasonParam}.` }, { status: 404 });
       }
 
-      const archiveData = archiveSnap.docs[0].data();
       dataSource = `Arsip Clashub CWL (${archiveData.season})`;
 
       if (archiveData.rounds) {

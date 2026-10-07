@@ -35,19 +35,25 @@ export async function GET(request: Request) {
     
     if (seasonParam === 'current') {
       const allDocsSnap = await archiveRef.orderBy('season', 'desc').get();
-      // FIX: Cari dokumen pertama yang ID-nya mengandung '_' (yaitu dokumen buatan clashub-nextjs / clashpin baru)
-      const validDoc = allDocsSnap.docs.find(d => d.id.includes('_'));
-      if (!validDoc) {
+      if (allDocsSnap.empty) {
         return NextResponse.json({ error: `Tidak ada data arsip valid.` }, { status: 404 });
       }
-      archiveData = validDoc.data();
+      
+      const latestSeason = allDocsSnap.docs[0].data().season;
+      const docsForLatest = allDocsSnap.docs.filter(d => d.data().season === latestSeason);
+      
+      // Prioritaskan dokumen clashub-nextjs yang pakai '_', kalau tidak ada pakai yang pertama
+      const bestDoc = docsForLatest.find(d => d.id.includes('_')) || docsForLatest[0];
+      archiveData = bestDoc.data();
     } else {
-      const docId = `${seasonParam}_${clanId}`;
-      const docSnap = await archiveRef.doc(docId).get();
-      if (!docSnap.exists) {
+      const docsSnap = await archiveRef.where('season', '==', seasonParam).get();
+      if (docsSnap.empty) {
         return NextResponse.json({ error: `Tidak ada data arsip untuk season ${seasonParam}.` }, { status: 404 });
       }
-      archiveData = docSnap.data();
+      
+      // Prioritaskan dokumen clashub-nextjs yang pakai '_', kalau tidak ada pakai yang pertama
+      const bestDoc = docsSnap.docs.find(d => d.id.includes('_')) || docsSnap.docs[0];
+      archiveData = bestDoc.data();
     }
     const actualSeason = archiveData.season;
 

@@ -85,7 +85,7 @@ export function HeaderBar() {
   if (!user) return null;
 
   return (
-    <header className="fixed top-0 left-0 w-full h-16 bg-[#0f0f13]/80 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/50 z-50 px-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 w-full h-16 bg-[#0f0f13]/80 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/50 z-[100] px-4 flex items-center justify-between">
       <div className="flex flex-col">
         <h1 className="text-lg font-black tracking-wide text-white">{getPageTitle()}</h1>
         {clanTag && <span className="text-[10px] text-gold font-mono uppercase tracking-widest">{clanTag}</span>}
@@ -115,7 +115,7 @@ export function HeaderBar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full right-0 mt-3 w-48 bg-[#121318] border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2 z-50 origin-top-right"
+              className="absolute top-full right-0 mt-3 w-48 bg-[#121318] border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2 z-[100] origin-top-right"
             >
               <div className="px-4 py-2 mb-2 border-b border-white/5">
                 <p className="text-sm font-bold text-white truncate">{user.displayName}</p>

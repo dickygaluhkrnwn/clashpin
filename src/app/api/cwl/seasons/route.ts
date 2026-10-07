@@ -29,10 +29,8 @@ export async function GET(request: Request) {
         return NextResponse.json({ seasons: [] }, { status: 200 });
       }
   
-      // FIX: Hanya ambil dokumen yang ID-nya mengandung '_' (format clashub-nextjs yang benar)
-      // Gunakan Set untuk membuang duplikat
-      const validDocs = snap.docs.filter(doc => doc.id.includes('_'));
-      const seasonsSet = new Set(validDocs.map(doc => doc.data().season).filter(Boolean));
+      // Kembalikan dukungan untuk membaca dokumen season lama yang format ID-nya tidak ada '_'
+      const seasonsSet = new Set(snap.docs.map(doc => doc.data().season).filter(Boolean));
       
       return NextResponse.json({ seasons: Array.from(seasonsSet) }, { status: 200 });
     } catch (error: any) {
